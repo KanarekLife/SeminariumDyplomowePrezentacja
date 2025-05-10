@@ -1,0 +1,4 @@
+{
+  "tinymist.fontPaths": ["./fonts"],
+  "tinymist.exportPdf": "onDocumentHasTitle"
+}
