@@ -46,7 +46,7 @@
 ]
 
 #title-slide[
-  Cel i Zakres pracy
+  Cel pracy i wdrożone zmiany
 ]
 
 #slide(title: "Cel pracy")[
@@ -57,22 +57,22 @@
       #set text(size: 18pt)
       - Celem projektu inżynierskiego jest naprawa, rozszerzenie oraz implementacja funkcjonalnych wymagań związanych z realizacją portalu dla Biura Armatora UG nazywanego później "ResearchCruiseApp".
   - Sama aplikacja powstała w ramach ubiegłorocznego projektu grupowego oraz następnie kontynuowana jako praca inżynierska. Wersja 1.1 będąca wynikiem tych prac została wdrożona na środowisko produkcyjne w grudniu 2024.
-  - Kontynuacja prac została podjęta przez nas zespoł początkowo w ramach projektu grupowego oraz będzie kontynuowana jako praca inżynierska.
+  - Kontynuacja prac została podjęta przez nasz zespoł początkowo w ramach projektu grupowego oraz jest kontynuowana jako praca inżynierska.
   ],
     image("imgs/bg.png")
   )
 ]
 
-#slide(title: "Cel pracy")[
-  Do najważniejszych zadań należących do naszego zespołu należą:
+#slide(title: "Wdrożone zmiany")[
+  Do najważniejszych zadań naszego zespołu należały:
   - Implementacja Formularza C
-  - Implementacja testów automatycznych umożliwiających łatwiejsze testowanie początkowo warstwy frontend, a docelowo pełnego systemu
+  - Implementacja testów automatycznych umożliwiających łatwiejsze testowanie, wstępnie warstwy frontend, a w przyszłości pełnego systemu
   - Naprawa lub rozszerzanie aktualnie zaimplementowanych funkcjonalności: większe możliwości zarządzania użytkownikami platformy, naprawa modułu uwierzytelniania, naprawa komunikacji z warstwą API w przypadku utraty połączenia z internetem
   - Refaktoryzacja warstwy frontend polegająca na ulepszeniu zarówno User Experience (UX) jak i Development Experience (DX)
   - Implementacja nowych funkcjonalności zgodnie z wymaganiami zebranymi od użytkowników platformy
 ]
 
-#slide(title: "Cel pracy - Formularz C")[
+#slide(title: "Wdrożone zmiany - Formularz C")[
   - W ramach aplikacji istnieje koncept formularzy wypełnianych przez naukowców starających się o rejs w ramach Biura Armatora. Formularz C był ostatnim z formularzy wymaganych w aplikacji i, z uwagi na ograniczenia czasowe, nie był zaimplementowany przed wdrożeniem aplikacji przez poprzedni zespół deweloperski.
 
   #image("imgs/formularz_c (1).png")
@@ -83,16 +83,20 @@
   #image("imgs/formularz_c (6).png")
 ]
 
-#slide(title: "Cel pracy - Testy Automatyczne")[
+#slide(title: "Wdrożone zmiany - Testy Automatyczne")[
   - Z uwagi na duże zmiany po stronie frontendu aplikacji podjęta była decyzja o potrzebie zdefiniowana oraz rozpisania testów automatycznych umożliwiających ochronę przed regresjami w procesie deweloperskim.
-  - Testy realizowane są przy użyciu technologii `Playwright` w języku `TypeScript`.
-  - W początkowej wersji zakładamy powstanie jedynie testów pokrywających warstwę frontend aplikacji oraz zastosowanie mocków w celu symulowania konkretnych odpowiedzi od strony backend'u.
-  - Po zakończeniu implementacji, planowane jest rozszerzenie metodologii testowania o testy E2E umożliwiającego jednoczesne uruchamianie i testowanie zarówno backendu jak i frontendu.
+  - Testy zrealizowane zostały przy użyciu technologii `Playwright` w języku `TypeScript`.
+  - W początkowej wersji założyliśmy powstanie jedynie testów pokrywających warstwę frontend aplikacji oraz zastosowanie mocków w celu symulowania konkretnych odpowiedzi od strony backend'u.
+  - Kolejnym możliwym rozwojem testów jest ich implementacja również po stronie backendu.
 
-  #align(center, image("imgs/testy_auto.png"))
+  #align(center, image("imgs/testy_auto2.png"))
+
+  - Po zaimplementowaniu, testy automatyczne zostały również dodane do CI projektu na Github Workflow.
+
+  #align(center, image("imgs/testy_gh_workflow.png", height: 80%))
 ]
 
-#slide(title: "Cel pracy - naprawa i rozszerzenie istniejących funkcjonalności")[
+#slide(title: "Wdrożone zmiany - usprawnianie istniejących funkcjonalności")[
   - Zwiększenie możliwości modyfikacji istniejących użytkowników z poziomu aplikacji
   #align(center, image("imgs/user_crud.png", height: 80%))
 
@@ -103,7 +107,7 @@
   #align(center, image("imgs/network_detection.png", height: 70%))
 ]
 
-#slide(title: "Cel pracy - usprawnienia UX / DX")[
+#slide(title: "Wdrożone zmiany - usprawnienia UX / DX")[
   #align(center, image("imgs/ux_1.png"))
   #align(center, image("imgs/ux_2.png"))
   #align(center, image("imgs/ux_3.png"))
@@ -113,17 +117,8 @@
   #align(center, image("imgs/ux_7.png"))
 ]
 
-#slide(title: "Cel pracy - nowe funkcjonalności")[
-  Przykładowe funkcjonalności czekające na implementację:
-
-  - Możliwość zarządzania i łatwego dostępu do zadań SPUB
-  - Konto statku umozliwiające odczyt istotnych danych z punktu widzenia załogi
-  - Możliwość dołączania precyzyjnych koordynatów GPS do formularza umożliwiających załodze lepsze planowanie rejsu
-  - Zwiększenie uprawnień Biura Armatora co do modyfikacji i zarządzania formularzami oraz rejsami w programie
-
-  i inne...
-
-  #align(center, image("imgs/gh_issues.png"))
+#slide(title: "Wdrożone zmiany - nowe funkcjonalności")[
+  // TODO
 ]
 
 #title-slide[
@@ -131,13 +126,16 @@
 ]
 
 #slide(title: "Harmonogram prac")[
+  #set text(size: 18pt)
   #table(
     columns: (1fr, 1fr),
     table.header(
       [*Termin*], [*Zadanie*],
-      [teraz - koniec maja 2025], [Zakończenie prac nad refaktorem aplikacji, wdrożenie nowej wersji na środowisko produkcyjne],
-      [koniec czerwca 2025], [Wprowadzenie testów automatycznych do projektu],
-      [czerwiec 2025 - październik 2025], [Implementacja nowych funkcjonalności (wg. kolejności ustalonej z klientami) oraz naprawa znajdywanych błędów],
+      [13 maja 2025], [Zakończenie prac nad refaktorem aplikacji, wypuszczenie nowej wersji 2.0.0],
+      [czerwiec 2025 - październik 2025], [Implementacja nowych funkcjonalności oraz naprawa znajdywanych błędów],
+      [21 września 2025], [Wprowadzenie testów automatycznych do projektu],
+      [październik 2025 - grudzień 2025], [Zapoznanie kolejnego zespołu z projektem],
+      [październik 2025 - grudzień 2025], [Opis prac związanych z projektem w postaci pracy inżynierskiej],
       [listopad 2025 - grudzień 2025], [Wdrożenie nowej wersji aplikacji oraz ew. naprawa krytycznych błędów]
     ),
   )
@@ -150,9 +148,12 @@
 ]
 
 #slide(title: "Aktualny stan pracy")[
-  - Większość prac związanych z refaktorem frontendu dopiega końca i powinna być zakończona do końca miesiąca.
-  - Testy automatyczne zgodnie z planem powinny gotowe do końca czerwca tego roku.
-  - Aktualnie implementujemy funkcjonalność drukowania formularza, moduł z zadaniami SPUB oraz zwiększenie możliwości Biura Armatora w kwestii zarządzania istniejącymi rejsami
+  - Większość prac związanych z nowymi funkcjonalnościami dobiegła końca.
+  - Testy automatyczne zgodnie z planem zostały wdrożone do projektu oraz pipeline'u CI.
+  - Aktualnie zajmujemy się:
+    - Wdrażaniem nowej wersji na środowisko klienta
+    - Wprowadzaniem nowego zespołu, który ma przejąć obowiązek utrzymywania aplikacji
+    - Opisywaniem naszego projektu w pracy inżynierskiej.
 ]
 
 #blank-slide[
