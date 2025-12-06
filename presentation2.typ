@@ -72,7 +72,94 @@
 ]
 
 #title-slide[
-  Przegląd zastosowanych technologii przy przepisywaniu frontendu
+  Przegląd procesu przepisywania frontendu aplikacji
+]
+
+#slide(title: "Porównajmy ponownie UX/UI przed i po")[
+  #align(center, image("imgs/ux_1.png"))
+  #align(center, image("imgs/ux_2.png"))
+  #align(center, image("imgs/ux_3.png"))
+]
+
+#slide(title: "Dlaczego przepisaliśmy frontend")[
+  - Poprzednia wersja była mało wydajna, nieczytelna oraz miała wiele błędów UX/UI.
+  - Użytkownicy doświadczali losowych problemów takich jak wylogowania przez błędną rotację tokenów, utratę stanu aplikacji w trakcie nawigacji czy brak poprawnego wyświetlania błędów.
+  - Ograniczone filtrowanie/sortowanie oraz chaotyczny UX utrudniały codzienną pracę.
+  - Kod był niespójny, trudny do utrzymania i (co najgorsze) stylowany jednym plikiem SCSS nadpisującym Bootstrap `（─.─||）`.
+]
+
+#slide(title: "Kod przed refaktorem")[
+  #align(center, image("imgs/c-03-01-previous-app-source-code-dir.png"))
+]
+
+#slide(title: "Kod przed refaktorem")[
+  #align(center, image("imgs/old-source-code.png"))
+]
+
+#slide(title: "Kod przed refaktorem")[
+  - Bardzo dużo powtórzeń kodu.
+  - Nadmierne wykorzystanie patternów i wzorców projektowych + React.
+  - Brak spójności w nazewnictwie i strukturze plików.
+  - Wiele komponentów w jednym pliku.
+  - Zatrważająco dużo `any` w TypeScript.
+]
+
+#slide(title: "Wykorzystane technologie")[
+  #grid(columns: 4, gutter: 4em, align: center,
+    grid(columns: 1, gutter: .25em, image("imgs/react-logo.png"), text(size: 18pt, "React")),
+    grid(columns: 1, gutter: .25em, image("imgs/typescript-logo.png"), text(size: 18pt, "TypeScript")),
+    grid(columns: 1, gutter: .25em, image("imgs/vite-logo.png"), text(size: 18pt, "Vite")),
+    grid(columns: 1, gutter: .25em, image("imgs/tailwind-logo.png"), text(size: 18pt, "Tailwind")),
+    grid(columns: 1, gutter: .05em, image("imgs/storybook-logo.png"), text(size: 18pt, "Storybook")),
+    grid(columns: 1, gutter: .25em, image("imgs/motion-logo.png"), text(size: 18pt, "Motion")),
+    grid(columns: 1, gutter: .25em, image("imgs/tanstack-logo.png"), text(size: 18pt, "TanStack Router")),
+    grid(columns: 1, gutter: .25em, image("imgs/zod-logo.png"), text(size: 18pt, "Zod")),
+  )
+]
+
+#slide(title: "Uzasadnienie wyboru technologii")[
+  - React + TypeScript jako baza dzięki doświadczeniu zespołu i popularności ekosystemu.
+  - Vite zamiast create-react-app/react-app-rewired: szybszy build/dev, prostsza konfiguracja.
+  - Tailwind CSS dla izolowanych, komponentowych stylów; rezygnacja z ciężkiego SCSS nadpisującego Bootstrap.
+  - Storybook do podglądu i testów komponentów UI, wsparcie dla wdrożenia kolejnych zespołów.
+  - Motion - animacje i przejścia dla lepszego UX.
+]
+
+#slide(title: "Uzasadnienie wyboru technologii")[
+  - TanStack Router: lepsza integracja z danymi, typowane ścieżki, wbudowane stany ładowania.
+  - TanStack Query zamiast czystego axios: cache odpowiedzi, retry idempotentnych żądań, praca offline.
+  - TanStack Forms: reaktywne formularze, walidacja na bazie zod, ochrona przed utratą danych.
+  - TanStack Table: generyczne filtrowanie/sortowanie, widok list na mobile, wyszukiwarka w tabelach.
+  - Własna biblioteka komponentów zamiast zewnętrznych UI kits dla pełnej spójności stylu.
+]
+
+#slide(title: "Kod po refaktoringu")[
+  #align(center, image("imgs/new-source-code-dir.png"))
+]
+
+#slide(title: "Kod po refaktoringu")[
+  #align(center, image("imgs/new-source-code.png"))
+  #align(center, image("imgs/new-source-code-2.png"))
+  #align(center, image("imgs/new-source-code-3.png"))
+  #align(center, image("imgs/new-source-code-4.png"))
+]
+
+#slide(title: "Storybook")[
+  #align(center, image("imgs/storybook.png"))
+]
+
+#slide(title: "Wyzwania w trakcie")[
+  - Odświeżanie tokenu poza React Query (brak dostępu do kontekstu).
+  - Walidacja z dwiema konfiguracjami zod w locie okazała się kłopotliwa; błąd naprawiono przy przekazaniu projektu.
+  - Kalkulacja pozycji dropdownów dla dużych ekranów miała błąd matematyczny (naprawa po 3 dniach debugowania).
+  - Druk PDF (react-to-print): konieczność duplikacji uproszczonych komponentów formularzy wydłużyła prace.
+]
+
+#slide(title: "Rezultaty po wdrożeniu")[
+  - Feature parity przy zachowaniu znanego stylu, ale z lepszym UX/UI i stabilnością.
+  - Wyższa wydajność potwierdzona Lighthouse: lepsze LCP (Largest Contentful Paint) oraz TBT (Total Blocking Time)
+  - Uporządkowany kod (komponentowe style, wyraźna struktura katalogów) ułatwia utrzymanie.
+  - Aplikacja dostępna u klienta od 20.11.2025; nowy zespół wdrożony i rozwija kolejne funkcje.
 ]
 
 #title-slide[
