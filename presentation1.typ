@@ -19,7 +19,7 @@
 // The front slide is the first slide of your presentation
 #front-slide(
   title: "Seminarium Dyplomowe Inżynierskie",
-  subtitle: [Rozwój portalu wspierającego obsługę rejsów dla biura Armatora Wydział Oceanografii i Geografii UG],
+  subtitle: [Rozwój portalu wspierającego obsługę rejsów dla biura Armatora Wydział Oceanografii i Geografii UG - realizacja wymagań funkcjonalnych],
   authors: list(
     [Bartłomiej Krawisz 193319],
     [Paweł Pstrągowski 193473],
@@ -117,8 +117,40 @@
   #align(center, image("imgs/ux_7.png"))
 ]
 
-#slide(title: "Wdrożone zmiany - nowe funkcjonalności")[
-  // TODO
+#slide(title: "Dodanie możliwości edycji i dodawania rejsu przez armatora")[
+  #align(center, image("imgs/dodawanie-nowego-rejsu-z-poziomu-konta-armatora.png"))
+  #align(center, image("imgs/dodawanie-nowego-rejsu-z-kierownik-nie-ma-wystarczających-uprawnień.png"))
+]
+#slide(title: "Dodanie okresów trwania rejsu do wyboru w formularzu A")[
+  #align(center, image("imgs/wybór-dokładnego-okresu-formularza-A.png"))
+  #align(center, image("imgs/wybór-okresu-dopuszczalnego-optymalnego-formularza-A.png"))
+]
+#slide(title: "Zaimplementowanie wielu skanów dokumentów do jednego pola")[
+  #align(center, image("imgs/dodanie-wielu-pdf-do-jednej-rubryki-z-umową.png"))
+  #align(center, image("imgs/dodanie-wielu-pdf-do-jednej-rubryki-z-umową-więcej.png"))
+]
+#slide(title: "Dodanie armatorowi uprawnień do usuwanie użytkowników")[
+  #align(center, image("imgs/widok-użytkowników-aplikacji.png"))
+  #align(center, image("imgs/edycja-użytkownika.png"))
+]
+#slide(title: "Dodanie roli załogi statku")[
+  #grid(
+    columns: (0.5fr, 0fr),
+    gutter: 0pt,
+    align: (left, right),
+  )[
+    Kierownik:
+    #image("imgs/widok-kierownika.png", width: 100%)
+    Administrator:
+    #image("imgs/widok-administratora.png", width: 98%)
+    Armator:
+    #image("imgs/widok-armatora.png", width: 100%)
+  ]
+]
+#slide(title: "Dodanie nowych obszarów rejonu prowadzenia badań")[
+  #align(center, image("imgs/dodanie-wsparcia-dla-wielu-i-customowych-obszarów-rejsów.png"))
+  #align(center, image("imgs/dodanie-wsparcia-dla-wielu-i-customowych-obszarów-rejsów-więcej.png"))
+  #align(center, image("imgs/nowy-rejon-zatoka-botnicka.png"))
 ]
 
 #title-slide[
