@@ -330,6 +330,192 @@
   Wybrane szczegóły implementacyjne w aplikacji
 ]
 
+
+#slide(title: "Frontend - Nowoczesny Stos Technologiczny")[
+  Aplikacja wykorzystuje najnowsze dostępne narzędzia w ekosystemie React.
+
+  - *React 19 RC*: Wykorzystanie funkcji biblioteki przed oficjalnym stabilnym wydaniem
+  - *Vite*: wydajny build tool
+  - *Ekosystem TanStack*:
+    - `@tanstack/react-query`: Zarządzanie stanem serwera, caching
+    - `@tanstack/react-table`: Headless UI do budowania skomplikowanych tabel
+    - `@tanstack/react-form`: Zarządzanie stanem formularzy i walidacją
+    - `@tanstack/react-router`: Type-safe routing
+  - *Tailwind CSS*: Najnowsza wersja silnika CSS
+]
+
+#slide(title: "Backend - Czysta Architektura")[
+  Backend zaprojektowany zgodnie z zasadami Domain-Driven Design (DDD) i Clean Architecture.
+
+  - *Podział na warstwy*: `Domain` (Core), `Application` (Use Cases), `Infrastructure` (Implementation), `Web` (API)
+  - *CQRS*: Rozdzielenie operacji odczytu (Queries) od zapisu (Commands) przy użyciu *MediatR*
+  - *Separacja logiki*: Każda operacja biznesowa to osobny, izolowany Handler
+]
+
+#slide(title: "Backend - Generator Kluczy (Custom Logic)")[
+  Generator identyfikatorów semantycznych (np. `2024/1`).
+
+  ```cs
+  // Infrastructure/Services/YearBasedKeyGenerator.cs
+  public async Task<string> GenerateKey<T>(IRepository<T> repository, ...)
+  {
+      var currentYear = DateTime.Now.Year.ToString(); // "2024"
+      var entities = await repository.GetAll(cancellationToken);
+
+      var maxOrdinal = entities
+          .Where(e => e.Number.StartsWith(currentYear))
+          .MaxBy(e => int.Parse(e.Number.Split('/')[1]))
+          ?.Number.Split('/')[1] ?? "0";
+
+      return $"{currentYear}/{int.Parse(maxOrdinal) + 1}";
+  }
+  ```
+]
+
+#slide(title: "Backend - Workflow i Maszyna Stanów")[
+  Logika biznesowa przejścia stanu (cofnięcie do edycji).
+
+  ```cs
+  // Application/.../RefillFormBHandler.cs
+  public async Task<Result> Handle(RefillFormBCommand request, ...)
+  {
+      var app = await repo.GetById(request.Id);
+
+      // Guard Clause: Sprawdzenie poprawności stanu
+      if (app.Status != Status.Undertaken && app.Status != Status.FormBFilled)
+          return Error.ForbiddenOperation("Nie można edytować.");
+
+      app.Status = Status.FormBRequired; // Zmiana stanu
+      await unitOfWork.Complete(); // Zapis
+      return Result.Empty;
+  }
+  ```
+]
+
+#slide(title: "j - Tabela z Formularzem")[
+  #set text(size: 18pt)
+  Połączenie TanStack Table z React Form.
+
+  ```tsx
+  // frontend/.../FormAResearchAreaSection.tsx
+  {
+    header: 'Rejon prowadzenia badań',
+    cell: ({ row }) => (
+      <form.Field
+          name={`researchAreaDescriptions[${row.index}].differentName`}
+          children={(field) => (
+            <AppInput
+               value={field.state.value}
+               onChange={field.handleChange}
+               errors={field.state.meta.errors} // Walidacja per wiersz
+            />
+          )}
+      />
+    )
+  }
+  ```
+]
+
+#slide(title: "Frontend - Zarządzanie Cyklem Życia (UI Logic)")[
+  #set text(size: 18pt)
+  Warunkowe renderowanie przycisków akcji w oparciu o status.
+
+  ```tsx
+  // frontend/.../CruiseDetailsPage.tsx
+  switch (cruiseQuery.data?.status) {
+      case 'Nowy':
+          return (
+            <>
+              <AppButton onClick={() => setEditMode(true)}>Edytuj</AppButton>
+              <AppButton onClick={() => setIsConfirmModal(true)}>Zatwierdź</AppButton>
+            </>
+          );
+      case 'Potwierdzony':
+          return (
+               <AppButton onClick={() => setIsRevertModal(true)}>Cofnij status</AppButton>
+          );
+  }
+  ```
+]
+
+#slide(title: "Backend - Bogaty Model Domenowy (Enum)")[
+  #set text(size: 18pt)
+  Wykorzystanie atrybutów do przechowywania przyjaznych nazw statusów bezpośrednio w kodzie.
+
+  ```cs
+  // Domain/Common/Enums/CruiseApplicationStatus.cs
+  public enum CruiseApplicationStatus
+  {
+      [StringValue("Wersja robocza")]
+      Draft,
+
+      [StringValue("Oczekujące na przełożonego")]
+      WaitingForSupervisor,
+
+      [StringValue("Zaakceptowane przez przełożonego")]
+      AcceptedBySupervisor,
+
+      // ...
+  }
+  ```
+]
+
+#slide(title: "Frontend - Custom Hook (Reużywalność)")[
+  Enkapsulacja logiki sprawdzania połączenia z API w prosty hook.
+
+  ```tsx
+  // modules/core/hooks/NetworkStatusApiHook.tsx
+  export function useNetworkStatusMutation({ setNetworkConnectionStatus }: Props) {
+    // Wywołanie prostego endpointu 'health'
+    return useMutation({
+      mutationFn: async () => client.get('/health'),
+      onSuccess: () => setNetworkConnectionStatus(true),
+      onError: () => setNetworkConnectionStatus(false),
+      retry: false,
+    });
+  }
+  ```
+]
+
+#slide(title: "Frontend - Type Safety (DTO)")[
+  Silne typowanie danych przesyłanych między formularzem a API.
+
+  ```tsx
+  // modules/cruise-schedule/models/CruiseFormDto.ts
+  export type CruiseFormDto = {
+    startDate: string;
+    endDate: string;
+    managersTeam: {
+        mainCruiseManagerId: string;
+        mainDeputyManagerId: string;
+    };
+    cruiseApplicationsIds: string[];
+    status?: string;
+    shipUnavailable: boolean;
+  };
+  ```
+]
+
+#slide(title: "Frontend - Kalendarz i Wizualizacja Danych")[ 
+  Transformacja danych domenowych na wydarzenia w kalendarzu.
+  ```tsx
+  // modules/cruise-schedule/components/CruiseCalendar.tsx
+  const events = React.useMemo(
+    () =>
+      cruises.map((cruise) => ({
+        title: getTitle(cruise),
+        start: new Date(cruise.startDate),
+        end: new Date(cruise.endDate),
+        link: `/cruises/${cruise.id}`,
+        // Dynamiczne kolorowanie w zależności od typu
+        color: cruise.shipUnavailable ? `#a10000` : getHashColor(cruise.title),
+      })),
+    [cruises]
+  );
+  return <AppCalendar events={events} />;
+```
+]
+
 #blank-slide[
   == Dziękujemy za uwagę!
 ]
