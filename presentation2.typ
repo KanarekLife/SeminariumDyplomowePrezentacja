@@ -92,6 +92,151 @@
 #slide(title: "Porównanie narzędzi do testów automatycznych")[
   *Selenium*
 
+  Zalety:
+    - Szerokie wsparcie dla wielu przeglądarek, między innymi `Google Chrome`, `Firefox`, `Safari`, a nawet `Internet Explorer`
+
+  Wady:
+    - Brak oficjalnego wsparcia dla TypeScript
+    - Nieintuicyjne czekanie na oczekiwaną wartość
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Selenium*
+
+  ```js
+  // Click the button
+  const button = await driver.findElement(By.id("myButton"));
+  await button.click();
+
+  // Check updated textbox value
+  const textbox = await driver.findElement(By.id("myTextbox"));
+  const val = await textbox.getAttribute("value");
+  assert.strictEqual(value, "Updated Value");
+  ```
+
+  ❌ Taki kod może w niektórych przypadkach  nie zadziałać
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Selenium*
+
+  ```js
+  // Click the button
+  const button = await driver.findElement(By.id("myButton"));
+  await button.click();
+
+  // Check updated textbox value
+  const textbox = await driver.findElement(By.id("myTextbox"));
+
+  // Wait until checkbox becomes the wanted value
+  await driver.wait(async () => {
+    const val = await textbox.getAttribute("value");
+    return val === "Updated Value";
+  }, 5000);
+  const val = await textbox.getAttribute("value");
+  assert.strictEqual(value, "Updated Value");
+  ```
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Cypress*
+
+  Zalety:
+    - Oficjalne wsparcie dla TypeScript
+    - Zaimplementowany domyślny, automatyczny sposób czekania na oczekiwaną wartość
+    - Udostępnia wiele narzędzi do inspekcji przebiegu testów
+
+  Wady:
+    - Duża część narzędzi jest dostępna tylko w dodatkowo płatnym `Cypress Cloud`
+    - W pełni oficjalnie wspierana jest tylko przeglądarka `Google Chrome`, z ograniczonym wsparciem dla przeglądarek `Firefox` i `Safari`
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Cypress*
+
+  ```ts
+  // Click the button
+  cy.get('#myButton').click();
+
+  // Check updated textbox value
+  cy.get<HTMLInputElement>('#myTextbox').should('have.value', 'Updated Value');
+  ```
+
+  ✅ Taki kod zaczeka na oczekiwaną wartość przez ustalony z góry czas (np. domyślnie 30 s), nie trzeba samemu pisać kodu czekającego, jak to miało miejsce w Selenium
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Puppeteer*
+
+  Zalety:
+    - Oficjalne wsparcie dla TypeScript
+
+  Wady:
+    - Aktualnie kompatybilny tylko z `Google Chrome` i `Firefox`
+    - Podobnie jak w Selenium, nieintuicyjne czekanie na zmianę wartości
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Puppeteer*
+
+  ```ts
+  // Click the button
+  await page.click("#myButton");
+
+  // Wait until textbox value becomes the expected value
+  await page.waitForFunction(
+    () => (document.getElementById("myTextbox")
+            as HTMLInputElement)?.value === "Updated Value",
+    { timeout: 5000 }
+  );
+
+  // Get updated textbox value
+  const value = await page.$eval("#myTextbox",
+    el => (el as HTMLInputElement).value);
+  assert.strictEqual(value, "Updated Value");
+  ```
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Playwright*
+
+  Zalety:
+    - Kompatybilność ze wszystkimi współcześnie popularnymi przeglądarkami (`Google Chrome`, `Firefox` i `Safari`), jak i również z ich wersjami mobilnymi
+    - Oficjalne wsparcie dla TypeScript
+    - Domyślne czekanie na zmianę wartości na oczekiwaną
+    - Łatwa inspekcja przebiegu testów
+
+  Wady:
+    - Trochę gorsze narzędzia do inspekcji niż Cypress w płatnym wariancie
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Playwright*
+
+  ```ts
+  // Click the button
+  await page.click('#myButton');
+
+  // Check updated textbox value
+  const textbox = page.locator('#myTextbox');
+  await expect(textbox).toHaveValue('Updated Value');
+  ```
+
+  ✅ Podobnie jak w Cypressie, tutaj również program automatycznie zaczeka przez ustalony czas
+]
+
+#slide(title: "Porównanie narzędzi do testów automatycznych")[
+  *Podsumowanie*
+
+  Po analizie różnych dostępnych rozwiązań, zdecydowaliśmy się na zastosowanie narzędzia *Playwright*.
+
+  #set align(center)
+
+  #grid(
+    columns: 1,
+    image("imgs/crown.png", height: 30%),
+    image("imgs/playwright_logo.png", height: 30%)
+  )
 ]
 
 #title-slide[
