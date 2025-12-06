@@ -3,6 +3,8 @@ all: build
 typst_args = --font-path ./fonts
 src_file1 = presentation1.typ
 src_file2 = presentation2.typ
+out_file1 := $(src_file1:.typ=.pdf)
+out_file2 := $(src_file2:.typ=.pdf)
 
 build: $(src_file1) $(src_file2)
 	typst compile $(src_file1) $(typst_args)
@@ -17,4 +19,7 @@ watch1:
 watch2:
 	typst watch $(src_file2) $(typst_args)
 
-.PHONY: all build watch1 watch2
+clean:
+	rm -f $(out_file1) $(out_file2)
+
+.PHONY: all build watch1 watch2 clean
