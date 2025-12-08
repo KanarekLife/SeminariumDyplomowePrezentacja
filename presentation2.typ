@@ -331,7 +331,7 @@
 ]
 
 
-#slide(title: "Frontend - Nowoczesny Stos Technologiczny")[
+#slide(title: "Frontend - Tech Stack")[
   Aplikacja wykorzystuje najnowsze dostępne narzędzia w ekosystemie React.
 
   - *React 19 RC*: Wykorzystanie funkcji biblioteki przed oficjalnym stabilnym wydaniem
@@ -344,55 +344,8 @@
   - *Tailwind CSS*: Najnowsza wersja silnika CSS
 ]
 
-#slide(title: "Backend - Czysta Architektura")[
-  Backend zaprojektowany zgodnie z zasadami Domain-Driven Design (DDD) i Clean Architecture.
 
-  - *Podział na warstwy*: `Domain` (Core), `Application` (Use Cases), `Infrastructure` (Implementation), `Web` (API)
-  - *CQRS*: Rozdzielenie operacji odczytu (Queries) od zapisu (Commands) przy użyciu *MediatR*
-  - *Separacja logiki*: Każda operacja biznesowa to osobny, izolowany Handler
-]
-
-#slide(title: "Backend - Generator Kluczy (Custom Logic)")[
-  Generator identyfikatorów semantycznych (np. `2024/1`).
-
-  ```cs
-  // Infrastructure/Services/YearBasedKeyGenerator.cs
-  public async Task<string> GenerateKey<T>(IRepository<T> repository, ...)
-  {
-      var currentYear = DateTime.Now.Year.ToString(); // "2024"
-      var entities = await repository.GetAll(cancellationToken);
-
-      var maxOrdinal = entities
-          .Where(e => e.Number.StartsWith(currentYear))
-          .MaxBy(e => int.Parse(e.Number.Split('/')[1]))
-          ?.Number.Split('/')[1] ?? "0";
-
-      return $"{currentYear}/{int.Parse(maxOrdinal) + 1}";
-  }
-  ```
-]
-
-#slide(title: "Backend - Workflow i Maszyna Stanów")[
-  Logika biznesowa przejścia stanu (cofnięcie do edycji).
-
-  ```cs
-  // Application/.../RefillFormBHandler.cs
-  public async Task<Result> Handle(RefillFormBCommand request, ...)
-  {
-      var app = await repo.GetById(request.Id);
-
-      // Guard Clause: Sprawdzenie poprawności stanu
-      if (app.Status != Status.Undertaken && app.Status != Status.FormBFilled)
-          return Error.ForbiddenOperation("Nie można edytować.");
-
-      app.Status = Status.FormBRequired; // Zmiana stanu
-      await unitOfWork.Complete(); // Zapis
-      return Result.Empty;
-  }
-  ```
-]
-
-#slide(title: "j - Tabela z Formularzem")[
+#slide(title: "Frontend - Tabela z Formularzem")[
   #set text(size: 18pt)
   Połączenie TanStack Table z React Form.
 
@@ -438,27 +391,6 @@
   ```
 ]
 
-#slide(title: "Backend - Bogaty Model Domenowy (Enum)")[
-  #set text(size: 18pt)
-  Wykorzystanie atrybutów do przechowywania przyjaznych nazw statusów bezpośrednio w kodzie.
-
-  ```cs
-  // Domain/Common/Enums/CruiseApplicationStatus.cs
-  public enum CruiseApplicationStatus
-  {
-      [StringValue("Wersja robocza")]
-      Draft,
-
-      [StringValue("Oczekujące na przełożonego")]
-      WaitingForSupervisor,
-
-      [StringValue("Zaakceptowane przez przełożonego")]
-      AcceptedBySupervisor,
-
-      // ...
-  }
-  ```
-]
 
 #slide(title: "Frontend - Custom Hook (Reużywalność)")[
   Enkapsulacja logiki sprawdzania połączenia z API w prosty hook.
@@ -515,6 +447,181 @@
   return <AppCalendar events={events} />;
 ```
 ]
+
+#slide(title: "Frontend - Bezpieczeństwo (Guards)")[
+  #set text(size: 16pt)
+  Deklaratywne sprawdzanie uprawnień na poziomie routingu.
+
+  ```tsx
+  // frontend/src/routes/usermanagement.tsx
+  export const Route = createFileRoute('/usermanagement')({
+    component: UserManagementPage,
+    // Blokada przed załadowaniem JS dla strony
+    beforeLoad: allowOnly.withRoles(Role.Administrator, Role.ShipOwner),
+  });
+
+  // frontend/src/modules/core/lib/guards.ts
+  allowOnly: {
+    withRoles: (...roles: Role[]) => async ({ context }) => {
+      // Weryfikacja ról w kontekście użytkownika
+      if (!roles.some((r) => context.userContext!.currentUser!.roles.includes(r))) {
+          throw redirect({ to: '/' });
+      }
+    }
+  }
+  ```
+]
+/*
+SPEAKER NOTES:
+- "Bezpieczeństwo to nie tylko ukrywanie przycisków w UI. Zaimplementowaliśmy 'Guards' na poziomie routera."
+- "Dzięki temu, kod strony administracyjnej nawet nie zostanie wykonany dla nieuprawnionego użytkownika – przekierowanie następuje w fazie `beforeLoad`."
+- "Rozwiązanie jest deklaratywne i łatwe w użyciu przy definiowaniu nowych ścieżek."
+*/
+
+#slide(title: "Frontend - Responsywność (Adaptive Tables)")[
+  #set text(size: 18pt)
+  Strategia dynamicznego wyboru komponentu tabeli w zależności od szerokości ekranu.
+
+  ```tsx
+  // frontend/src/modules/core/components/table/AppTable.tsx
+  export function AppTable<T>(props: Props<T>) {
+    const { width } = useWindowSize(); // Custom hook
+
+    // Wybór implementacji: klasyczna tabela webowa vs lista kart na mobile
+    const TableComponent = width < 768 ? AppMobileTable : AppDesktopTable;
+
+    return (
+      <TableComponent
+        table={table} // Wspólna instancja TanStack Table
+        variant={props.variant}
+        // ...
+      />
+    );
+  }
+  ```
+]
+/*
+SPEAKER NOTES:
+- "Tabelki na telefonach to odwieczny problem. My podeszliśmy do tego 'adaptacyjnie'."
+- "Nie próbujemy ściskać kolumn CSS-em. Zamiast tego, dynamicznie podmieniamy cały komponent renderujący."
+- "Logika biznesowa tabeli (sortowanie, filtrowanie) jest wspólna (dzięki TanStack Table), zmienia się tylko warstwa prezentacji: klasyczna tabela na desktopie, lista kart na mobile."
+*/
+
+#slide(title: "Frontend - Auth Flow (Silent Refresh)")[
+  #set text(size: 16pt)
+  Automatyczne odświeżanie tokena (Silent Refresh) przy błędzie 401.
+
+  ```tsx
+  // frontend/src/modules/user/providers/UserContextProvider.tsx
+  React.useEffect(() => {
+    const interceptorId = createAuthRefreshInterceptor(
+      client,
+      async (failedRequest) => {
+        // 1. Próba odświeżenia tokena
+        await context.refreshUser();
+
+        // 2. Ponowienie oryginalnego zapytania z nowym tokenem
+        failedRequest.response.config.headers['Authorization'] = 
+            `Bearer ${getStoredAuthDetails()?.accessToken}`;
+        return failedRequest;
+      },
+      { statusCodes: [401], pauseInstanceWhileRefreshing: true }
+    );
+    return () => client.interceptors.response.eject(interceptorId);
+  }, [context]);
+  ```
+]
+/*
+SPEAKER NOTES:
+- "Użytkownik nie powinien być wylogowywany w połowie wypełniania długiego formularza."
+- "Wykorzystujemy 'Axios Interceptors' do obsługi błędu 401 (Unauthorized)."
+- "Aplikacja automatycznie, w tle, próbuje odświeżyć token i ponowić zapytanie. Użytkownik nawet nie zauważa, że jego sesja wygasła."
+*/
+
+#slide(title: "Frontend - Jakość (E2E Testing)")[
+  Zaawansowane testy z wykorzystaniem Playwright i wzorca Page Object Model.
+
+  ```tsx
+  // frontend/tests/fixtures/fixtures.ts
+  export const formTest = test.extend<{ formAPage: FormAPage }>({
+    formAPage: async ({ page }, use) => {
+      // Wstrzykiwanie gotowego obiektu strony (POM)
+      const formAPage = await FormAPage.create(page);
+      await use(formAPage);
+    },
+  });
+
+  // frontend/tests/formA.spec.ts
+  test('valid form A', async ({ formAPage }) => {
+    // Testy czytelne jak język naturalny
+    await formAPage.fillForm(); 
+    await formAPage.submitForm({ expectedResult: 'valid' });
+  });
+  ```
+]
+/*
+SPEAKER NOTES:
+- Wykorzystujemy Playwright do testów End-to-End."
+- "Dzięki Custom Fixtures i wzorcowi Page Object Model, nasze testy są niezwykle czytelne."
+- "Zamiast pisać `page.click('.btn-primary')`, piszemy `formPage.submitForm()`. To ułatwia utrzymanie testów przy zmianach w UI."
+*/
+
+#slide(title: "Frontend - Error Handling")[
+  Obsługa krytycznych błędów (Error Boundaries).
+
+  ```tsx
+  // frontend/src/modules/core/components/layout/AppErrorHandler.tsx
+  export function AppErrorHandler({ error }: ErrorComponentProps) {
+    return (
+      <AppLayout title={'Wystąpił nieoczekiwany błąd'}>
+         {/* ... */}
+         <div className="font-semibold">{error.message}</div>
+         <div className="text-center">
+            Prosimy o maila na adres <AppLink>rejsy.help@ug.edu.pl</AppLink>.
+         </div>
+         <AppButton href="/">Przejdź do strony głównej</AppButton>
+      </AppLayout>
+    );
+  }
+  ```
+]
+/*
+SPEAKER NOTES:
+- "Zamiast białego ekranu (White Screen of Death), jest przyjazny komunikat."
+- "Użytkownik widzi co się stało i ma jasną ścieżkę działania: powrót do strony głównej lub bezpośredni kontakt ze wsparciem."
+*/
+
+#slide(title: "Frontend - UX & Motion")[
+  #set text(size: 16pt)
+  Detale i subtelne animacje.
+
+  ```tsx
+  // frontend/src/modules/core/components/layout/AppNavbar.tsx
+  <motion.header
+    initial={{ y: -100 }} // Animacja wjazdu nagłówka
+    animate={{ y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    {/* ... */}
+    <motion.div whileHover={{ scale: 1.1 }}> {/* subtelna animacja */}
+       <AppLink href="/">Portal R/V Oceanograf</AppLink>
+    </motion.div>
+    
+    <AnimatePresence>
+      {userContext.currentUser && (
+        <motion.div exit={{ scale: 0 }}> {/* Płynne znikanie */}
+           <AppButton onClick={signOut}>Wyloguj</AppButton>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </motion.header>
+  ```
+]
+/*
+SPEAKER NOTES:
+- "Używamy biblioteki `Motion` (dawniej Framer Motion) do dodania życia interfejsowi."
+- "Subtelne animacje przy wejściu elementów czy hoverze zwiększają poczucie responsywności i nowoczesności aplikacji."
+*/
 
 #blank-slide[
   == Dziękujemy za uwagę!
